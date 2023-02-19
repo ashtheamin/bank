@@ -68,7 +68,9 @@ def databaseInit():
         """),
         ("""
         CREATE TABLE accounts (
-            userID SERIAL PRIMARY KEY,
+            accountID SERIAL PRIMARY KEY,
+            userID SERIAL,
+            balance VARCHAR,
             FOREIGN KEY (userID)
             REFERENCES users (userID)
             ON UPDATE CASCADE ON DELETE CASCADE
@@ -100,7 +102,7 @@ def databaseUserNew(name):
     sql = """INSERT INTO users(userName)
              VALUES(%s) RETURNING userID;"""
     conn = None
-    userID = None
+    user = None
     try:
         # read database configuration
         params = databaseConfig()
@@ -110,7 +112,7 @@ def databaseUserNew(name):
         cur = conn.cursor()
         # execute the INSERT statement
         cur.execute(sql, (name,))
-        userID = cur.fetchone()
+        user = cur.fetchone()
 
         # commit the changes to the database
         conn.commit()
@@ -122,7 +124,7 @@ def databaseUserNew(name):
         if conn is not None:
             conn.close()
 
-    return userID
+    return user
 
 # Retrieve a user
 def databaseUserGetByID(userID):
@@ -208,10 +210,12 @@ def databaseUserUpdateNameByID(userID, name):
             conn.close()
 
 # Open an account for a user.
-def databaseAccountNew(userID):
-    sql = """UPDATE accounts SET userName=(%s) WHERE userID=(%s);"""
+def databaseAccountNew(userID, balance):
+    sql = """INSERT INTO accounts(userID, balance)
+             VALUES(%s, %s) RETURNING accountID;
+             """
     conn = None
-    user = None
+    account = None
     try:
         # read database configuration
         params = databaseConfig()
@@ -220,7 +224,7 @@ def databaseAccountNew(userID):
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (userID,))
+        cur.execute(sql, (userID, balance))
 
         # commit the changes to the database
         conn.commit()
@@ -232,7 +236,10 @@ def databaseAccountNew(userID):
         if conn is not None:
             conn.close()
 
+    return account
+
 if __name__ == '__main__':
     databaseInit()
     databaseUserNew("Ash")
     databaseUserUpdateNameByID(1, "Ashley")
+    databaseAccountNew(1, 0)
