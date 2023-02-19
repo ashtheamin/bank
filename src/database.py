@@ -7,7 +7,7 @@ import psycopg2
 from configparser import ConfigParser
 
 # Function is from: https://www.postgresqltutorial.com/postgresql-python/connect/
-def database_config(filename='database.ini', section='postgresql'):
+def databaseConfig(filename='database.ini', section='postgresql'):
     # create a parser
     parser = ConfigParser()
     # read config file
@@ -25,12 +25,12 @@ def database_config(filename='database.ini', section='postgresql'):
     return db
 
 # Function to test connection to database
-def database_connect():
+def databaseConnect():
     """ Connect to the PostgreSQL database server """
     conn = None
     try:
         # read connection parameters
-        params = database_config()
+        params = databaseConfig()
 
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
@@ -57,24 +57,34 @@ def database_connect():
             print('Database connection closed.')
 
 # Initialise Database
-def database_init():
+def databaseInit():
     """ create tables in the PostgreSQL database"""
-    command = (
-        """
+    commands = [
+        ("""
         CREATE TABLE users (
-            user_id SERIAL PRIMARY KEY,
-            user_name VARCHAR(255) NOT NULL
+            userID SERIAL PRIMARY KEY,
+            userName VARCHAR(255) NOT NULL
         )
-        """)
+        """),
+        ("""
+        CREATE TABLE accounts (
+            userID SERIAL PRIMARY KEY,
+            FOREIGN KEY (userID)
+            REFERENCES users (userID)
+            ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """),
+        ]
     conn = None
     try:
         # read the connection parameters
-        params = database_config()
+        params = databaseConfig()
         # connect to the PostgreSQL server
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
         # create table one by one
-        cur.execute(command)
+        for command in commands:
+            cur.execute(command)
         # close communication with the PostgreSQL database server
         cur.close()
         # commit the changes
@@ -86,21 +96,21 @@ def database_init():
             conn.close()
 
 # Create a new user
-def database_user_new(name):
-    sql = """INSERT INTO users(user_name)
-             VALUES(%s) RETURNING user_id;"""
+def databaseUserNew(name):
+    sql = """INSERT INTO users(userName)
+             VALUES(%s) RETURNING userID;"""
     conn = None
-    user_id = 1
+    userID = None
     try:
         # read database configuration
-        params = database_config()
+        params = databaseConfig()
         # connect to the PostgreSQL database
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
         cur.execute(sql, (name,))
-        user_id = cur.fetchone()
+        userID = cur.fetchone()
 
         # commit the changes to the database
         conn.commit()
@@ -112,8 +122,117 @@ def database_user_new(name):
         if conn is not None:
             conn.close()
 
-    return user_id
+    return userID
+
+# Retrieve a user
+def databaseUserGetByID(userID):
+    """
+    Inputs: id:
+    Outputs: User tuple (id, name)
+    """
+    sql = """SELECT * FROM users WHERE
+            userID=(%s);"""
+    conn = None
+    user = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql, (userID,))
+        user = cur.fetchone()
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+    return user
+
+# Delete a user
+def databaseUserDeleteByID(userID):
+    sql = """DELETE FROM users WHERE userID=(%s);"""
+    conn = None
+    user = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql, (userID,))
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+# Update a user's name:
+def databaseUserUpdateNameByID(userID, name):
+    sql = """UPDATE users SET userName=(%s) WHERE userID=(%s);"""
+    conn = None
+    user = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql, (name,userID,))
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+# Open an account for a user.
+def databaseAccountNew(userID):
+    sql = """UPDATE accounts SET userName=(%s) WHERE userID=(%s);"""
+    conn = None
+    user = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql, (userID,))
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 if __name__ == '__main__':
-    database_init()
-    database_user_new("Lee")
+    databaseInit()
+    databaseUserNew("Ash")
+    databaseUserUpdateNameByID(1, "Ashley")
