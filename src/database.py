@@ -7,6 +7,8 @@ import psycopg2
 from configparser import ConfigParser
 import bcrypt
 
+from bankToken import tokenNew, tokenDecrypt
+
 # Function is from: https://www.postgresqltutorial.com/postgresql-python/connect/
 def databaseConfig(filename='database.ini', section='postgresql'):
     # create a parser
@@ -149,23 +151,22 @@ def databaseUserLogin(email, password):
         cur = conn.cursor()
 
         # Get the hashed password for the email.
-        cur.execute("""SELECT password FROM users WHERE email=(%s);""", (email,))
+        # Also get the user ID
+        cur.execute("""SELECT password, userID FROM users WHERE email=(%s);""", (email,))
         sql_return = cur.fetchone()
         storedPasswordHash = sql_return[0] # type:ignore
+        userID = sql_return[1] # type:ignore
 
         # Generate salt and hashed password.
         if bcrypt.checkpw(password.encode('utf-8'), storedPasswordHash.encode('utf-8')):
             print("match")
-        else:
-            print("No match")
             conn.commit()
             cur.close()
-            return
-
-        # commit the changes to the database
-        conn.commit()
-        # close communication with the database
-        cur.close()
+            return tokenNew(userID)
+        else:
+            conn.commit()
+            cur.close()
+            return None
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
@@ -394,4 +395,6 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
 if __name__ == '__main__':
     databaseInit()
     databaseUserNew("Ash", "hunter2", "ash@gmail.com")
-    databaseUserLogin("ash@gmail.com", "hunter2")
+    databaseUserNew("Ash", "hunter2", "ash1@gmail.com")
+    databaseUserNew("Ash", "hunter2", "ash2@gmail.com")
+    print(tokenDecrypt(databaseUserLogin("ash1@gmail.com", "hunter2")))
