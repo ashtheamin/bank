@@ -5,4 +5,4 @@ Web based banking app
 `sudo -u postgres psql`
 
 # How to open bankdb database in psql:
-`database -c bankdb`
+`database \c bankdb`

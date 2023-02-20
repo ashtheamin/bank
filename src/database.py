@@ -5,6 +5,7 @@
 
 import psycopg2
 from configparser import ConfigParser
+import bcrypt
 
 # Function is from: https://www.postgresqltutorial.com/postgresql-python/connect/
 def databaseConfig(filename='database.ini', section='postgresql'):
@@ -63,7 +64,9 @@ def databaseInit():
         ("""
         CREATE TABLE users (
             userID SERIAL PRIMARY KEY,
-            userName VARCHAR(255) NOT NULL
+            userName VARCHAR(255) NOT NULL,
+            email VARCHAR UNIQUE NOT NULL,
+            password VARCHAR NOT NULL
         )
         """),
         ("""
@@ -76,7 +79,11 @@ def databaseInit():
             ON UPDATE CASCADE ON DELETE CASCADE
         )
         """),
-        ]
+        ("""
+        CREATE TABLE bank (
+            balance VARCHAR
+        )
+        """),]
     conn = None
     try:
         # read the connection parameters
@@ -87,6 +94,8 @@ def databaseInit():
         # create table one by one
         for command in commands:
             cur.execute(command)
+        # Store bank balance.
+        cur.execute("""INSERT INTO bank (balance) VALUES(%s)""", ("0",))
         # close communication with the PostgreSQL database server
         cur.close()
         # commit the changes
@@ -98,21 +107,24 @@ def databaseInit():
             conn.close()
 
 # Create a new user.
-def databaseUserNew(name):
-    sql = """INSERT INTO users(userName)
-             VALUES(%s) RETURNING userID;"""
+def databaseUserNew(name, password:str, email):
     conn = None
-    user = None
     try:
         # read database configuration
         params = databaseConfig()
+
         # connect to the PostgreSQL database
         conn = psycopg2.connect(**params)
+
         # create a new cursor
         cur = conn.cursor()
-        # execute the SQL statement
-        cur.execute(sql, (name,))
-        user = cur.fetchone()
+
+        # Generate salt and hashed password.
+        hashedBytes:bytes = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        hashed:str = hashedBytes.decode("utf-8")
+
+        # Add the user
+        cur.execute("""INSERT INTO users(userName, email, password)VALUES(%s,%s, %s) RETURNING userID;""", (name, email, hashed,))
 
         # commit the changes to the database
         conn.commit()
@@ -124,7 +136,41 @@ def databaseUserNew(name):
         if conn is not None:
             conn.close()
 
-    return user
+# Login a user, return a JWT.
+def databaseUserLogin(email, password):
+    conn = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+
+        # create a new cursor
+        cur = conn.cursor()
+
+        # Get the hashed password for the email.
+        cur.execute("""SELECT password FROM users WHERE email=(%s);""", (email,))
+        sql_return = cur.fetchone()
+        storedPasswordHash = sql_return[0] # type:ignore
+
+        # Generate salt and hashed password.
+        if bcrypt.checkpw(password.encode('utf-8'), storedPasswordHash.encode('utf-8')):
+            print("match")
+        else:
+            print("No match")
+            conn.commit()
+            cur.close()
+            return
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 # Retrieve a user.
 def databaseUserGetByID(userID):
@@ -299,6 +345,20 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
         # create a new cursor
         cur = conn.cursor()
 
+        # Check if the accounts exist.
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (fromAccountID,))
+        if cur.fetchone() == None:
+            conn.commit()
+            cur.close()
+            return
+        
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (toAccountID,))
+        if cur.fetchone() == None:
+            conn.commit()
+            cur.close()
+            return
+
+
         # Get the from account's balance
         fromAccountBalance = 0
         cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (fromAccountID,))
@@ -333,8 +393,5 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
 
 if __name__ == '__main__':
     databaseInit()
-    #databaseUserNew("Ash")
-    #databaseUserUpdateNameByID(1, "Ashley")
-    #databaseAccountNew(1, 1000)
-    #databaseAccountNew(1, 1000)
-    databaseAccountTransferFunds(2, 1, 5000)
+    databaseUserNew("Ash", "hunter2", "ash@gmail.com")
+    databaseUserLogin("ash@gmail.com", "hunter2")
