@@ -24,7 +24,7 @@ def databaseConfig(filename='database.ini', section='postgresql'):
 
     return db
 
-# Function to test connection to database
+# Function to test connection to database.
 def databaseConnect():
     """ Connect to the PostgreSQL database server """
     conn = None
@@ -56,7 +56,7 @@ def databaseConnect():
             conn.close()
             print('Database connection closed.')
 
-# Initialise Database
+# Initialise Database.
 def databaseInit():
     """ create tables in the PostgreSQL database"""
     commands = [
@@ -97,7 +97,7 @@ def databaseInit():
         if conn is not None:
             conn.close()
 
-# Create a new user
+# Create a new user.
 def databaseUserNew(name):
     sql = """INSERT INTO users(userName)
              VALUES(%s) RETURNING userID;"""
@@ -110,7 +110,7 @@ def databaseUserNew(name):
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        # execute the SQL statement
         cur.execute(sql, (name,))
         user = cur.fetchone()
 
@@ -126,7 +126,7 @@ def databaseUserNew(name):
 
     return user
 
-# Retrieve a user
+# Retrieve a user.
 def databaseUserGetByID(userID):
     """
     Inputs: id:
@@ -143,7 +143,7 @@ def databaseUserGetByID(userID):
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        # execute the SQL statement
         cur.execute(sql, (userID,))
         user = cur.fetchone()
 
@@ -159,7 +159,7 @@ def databaseUserGetByID(userID):
 
     return user
 
-# Delete a user
+# Delete a user.
 def databaseUserDeleteByID(userID):
     sql = """DELETE FROM users WHERE userID=(%s);"""
     conn = None
@@ -171,7 +171,7 @@ def databaseUserDeleteByID(userID):
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        # execute the SQL statement
         cur.execute(sql, (userID,))
 
         # commit the changes to the database
@@ -184,7 +184,7 @@ def databaseUserDeleteByID(userID):
         if conn is not None:
             conn.close()
 
-# Update a user's name:
+# Update a user's name.
 def databaseUserUpdateNameByID(userID, name):
     sql = """UPDATE users SET userName=(%s) WHERE userID=(%s);"""
     conn = None
@@ -196,7 +196,7 @@ def databaseUserUpdateNameByID(userID, name):
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        # execute the SQL statement
         cur.execute(sql, (name,userID,))
 
         # commit the changes to the database
@@ -223,7 +223,7 @@ def databaseAccountNew(userID, balance):
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        # execute the SQL statement
         cur.execute(sql, (userID, balance))
 
         # commit the changes to the database
@@ -238,7 +238,7 @@ def databaseAccountNew(userID, balance):
 
     return account
 
-# Update account balance
+# Update account balance.
 def databaseAccountBalanceUpdateByID(accountID, balance):
     sql = """UPDATE accounts SET balance=(%s) WHERE accountID=(%s);"""
     conn = None
@@ -250,7 +250,7 @@ def databaseAccountBalanceUpdateByID(accountID, balance):
         conn = psycopg2.connect(**params)
         # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        # execute the SQL statement
         cur.execute(sql, (balance,accountID,))
 
         # commit the changes to the database
@@ -263,8 +263,78 @@ def databaseAccountBalanceUpdateByID(accountID, balance):
         if conn is not None:
             conn.close()
 
+# Delete account.
+def databaseAccountDeleteByID(accountID):
+    sql = """DELETE FROM accounts WHERE accountID=(%s);"""
+    conn = None
+    user = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the SQL statement
+        cur.execute(sql, (accountID,))
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+# Transfer funds between accounts.
+def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTransfer):
+    conn = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+
+        # Get the from account's balance
+        fromAccountBalance = 0
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (fromAccountID,))
+        fromAccountBalance = int(cur.fetchone()[0]) # type:ignore
+
+        if fromAccountBalance < amountOfFundsToTransfer:
+            conn.commit()
+            cur.close()
+            return
+        
+        # Deduct the account's balance.
+        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((fromAccountBalance-amountOfFundsToTransfer), fromAccountID,))
+
+        # Get the to account balance.
+        toAccountBalance = 0
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (toAccountID,))
+        toAccountBalance = int(cur.fetchone()[0]) # type:ignore
+
+        # Add the funds to the transferred account's balance.
+        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((toAccountBalance+amountOfFundsToTransfer), toAccountID,))
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+
 if __name__ == '__main__':
     databaseInit()
-    databaseUserNew("Ash")
-    databaseUserUpdateNameByID(1, "Ashley")
-    databaseAccountNew(1, 0)
+    #databaseUserNew("Ash")
+    #databaseUserUpdateNameByID(1, "Ashley")
+    #databaseAccountNew(1, 1000)
+    #databaseAccountNew(1, 1000)
+    databaseAccountTransferFunds(2, 1, 5000)
