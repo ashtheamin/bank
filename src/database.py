@@ -150,6 +150,13 @@ def databaseUserLogin(email, password):
         # create a new cursor
         cur = conn.cursor()
 
+        # If the email doesn't exist, return None:
+        cur.execute("""SELECT * from users WHERE email=(%s);""", (email,))
+        if cur.fetchone() == None:
+            conn.commit()
+            cur.close()
+            return None
+
         # Get the hashed password for the email.
         # Also get the user ID
         cur.execute("""SELECT password, userID FROM users WHERE email=(%s);""", (email,))
@@ -380,6 +387,39 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
 
         # Add the funds to the transferred account's balance.
         cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((toAccountBalance+amountOfFundsToTransfer), toAccountID,))
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+# Deposit funds into account.
+def databaseAccountDepositFunds(accountID, amountToDeposit):
+    conn = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+
+        # Check if the accounts exist.
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (accountID,))
+        sqlReturn = cur.fetchone()
+        if sqlReturn == None:
+            conn.commit()
+            cur.close()
+            return
+        accountBalance = sqlReturn[0] # type:ignore
+        
+        # Deduct the account's balance.
+        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((accountBalance + amountToDeposit), accountID,))
 
         # commit the changes to the database
         conn.commit()
