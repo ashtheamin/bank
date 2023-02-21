@@ -15,5 +15,11 @@ def setBrowserLoginCookie():
 @app.route('/recieveUserLoginForm', methods=['POST'])
 def recieveUserLoginForm():
     print(request.form['email']) #type: ignore
+    print(request.form['password']) #type: ignore
     print(request.cookies.get('jwt')) #type: ignore
+    return app.send_static_file("index.html")
+
+@app.route('/recieveToken', methods=['POST'])
+def recieveToken():
+    token = request.cookies.get('jwt') #type: ignore
     return app.send_static_file("index.html")

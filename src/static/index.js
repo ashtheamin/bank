@@ -34,6 +34,12 @@ function renderLoginForm() {
     loginForm.appendChild(password);
     loginForm.appendChild(submit);
     document.getElementsByTagName("body")[0].appendChild(loginForm);
+
+    loginForm.addEventListener("submit", function(event) {
+        console.log("Hi");
+        fetch("/setBrowserLoginCookie").then(
+            response => response.text()).then(text => console.log(text))
+    })
 }
 
 renderLoginForm();
