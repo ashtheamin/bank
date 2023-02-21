@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response
+from database import *
 
 app = Flask(__name__, static_url_path=("/static"))
 
@@ -6,20 +7,23 @@ app = Flask(__name__, static_url_path=("/static"))
 def index():
     return app.send_static_file("index.html")
 
-@app.route('/setBrowserLoginCookie', methods=['GET', 'POST'])
-def setBrowserLoginCookie():
-    response = make_response(app.send_static_file("index.html"))
-    response.set_cookie('jwt', 'jaydoubleyouteefromserver')
-    return response
-
 @app.route('/recieveUserLoginForm', methods=['POST'])
 def recieveUserLoginForm():
-    print(request.form['email']) #type: ignore
-    print(request.form['password']) #type: ignore
-    print(request.cookies.get('jwt')) #type: ignore
-    return app.send_static_file("index.html")
+    response = make_response(app.send_static_file("index.html"))
+    databaseInit()
+    databaseUserNew("", request.form['email'] ,request.form['password']) #type: ignore
+    token = databaseUserLogin(request.form['email'], request.form['password']) #type: ignore
+    response.set_cookie('jwt', token)
+    return response
 
-@app.route('/recieveToken', methods=['POST'])
+@app.route('/recieveToken', methods=['POST', 'GET'])
 def recieveToken():
     token = request.cookies.get('jwt') #type: ignore
-    return app.send_static_file("index.html")
+    response = make_response()
+    databaseInit()
+    exists = databaseTokenValidateExistence(token)
+    if exists == True:
+        response.set_cookie('jwtValid', 'true')
+    else:
+        response.set_cookie('jwtValid', 'false')
+    return response

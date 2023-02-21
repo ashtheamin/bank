@@ -13,6 +13,7 @@ function renderLoginForm() {
     email.setAttribute("type", "text");
     email.setAttribute("name", "email");
     email.setAttribute("id", "email");
+    email.setAttribute("required", "true");
     email.setAttribute("autocomplete", "current-email")
 
     const passwordLabel = document.createElement("label");
@@ -21,6 +22,7 @@ function renderLoginForm() {
     password.setAttribute("type", "password");
     password.setAttribute("name", "password");
     password.setAttribute("id", "password");
+    password.setAttribute("required", "true")
     password.setAttribute("autocomplete", "current-password")
 
     const submit = document.createElement("input");
@@ -34,14 +36,22 @@ function renderLoginForm() {
     loginForm.appendChild(password);
     loginForm.appendChild(submit);
     document.getElementsByTagName("body")[0].appendChild(loginForm);
+}
 
-    loginForm.addEventListener("submit", function(event) {
-        console.log("Hi");
-        fetch("/setBrowserLoginCookie").then(
-            response => response.text()).then(text => console.log(text))
+// Get cookie function from StackOverFlow by allenhwkim
+// https://stackoverflow.com/a/49224652
+function getCookie(name) {
+    let cookie = {};
+    document.cookie.split(';').forEach(function(el) {
+      let [k,v] = el.split('=');
+      cookie[k.trim()] = v;
     })
+    return cookie[name];
 }
 
 renderLoginForm();
 
-console.log(document.cookie)
+fetch("/recieveToken").then(
+    response => response.text()).then(text => console.log(text))
+
+console.log(getCookie('jwtValid'));

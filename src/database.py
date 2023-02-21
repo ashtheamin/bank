@@ -108,8 +108,46 @@ def databaseInit():
         if conn is not None:
             conn.close()
 
+# Validate whether a token/user exists:
+def databaseTokenValidateExistence(token):
+    conn = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+
+        # create a new cursor
+        cur = conn.cursor()
+
+        # Get the user ID.
+        userID = tokenDecrypt(token)['userID']
+
+        # Find the user.
+        cur.execute("""SELECT * FROM users WHERE userid=(%s)""", (userID,))
+
+        # Return false if the user in the token isn't found
+        if (cur.fetchone() == None):
+            conn.commit()
+            cur.close()
+            return False
+
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+
+        # Return user found.
+        return True
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
 # Create a new user.
-def databaseUserNew(name, password:str, email):
+def databaseUserNew(name, email, password:str):
     conn = None
     try:
         # read database configuration
@@ -430,11 +468,3 @@ def databaseAccountDepositFunds(accountID, amountToDeposit):
     finally:
         if conn is not None:
             conn.close()
-
-
-if __name__ == '__main__':
-    databaseInit()
-    databaseUserNew("Ash", "hunter2", "ash@gmail.com")
-    databaseUserNew("Ash", "hunter2", "ash1@gmail.com")
-    databaseUserNew("Ash", "hunter2", "ash2@gmail.com")
-    print(tokenDecrypt(databaseUserLogin("ash1@gmail.com", "hunter2")))
