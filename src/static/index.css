@@ -4,3 +4,12 @@ html {
     background-color: #CAD2C5;
     color: #2F3E46
 }
+
+input {
+    display: block;
+    width: 100%;
+}
+
+.submit {
+    width:104%;
+}
