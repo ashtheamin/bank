@@ -49,9 +49,20 @@ function getCookie(name) {
     return cookie[name];
 }
 
-renderLoginForm();
+async function validateToken() {
+    await fetch('/recieveToken').then().then()
+    console.log(getCookie('jwtValid'));
+}
 
-fetch("/recieveToken").then(
-    response => response.text()).then(text => console.log(text))
-
-console.log(getCookie('jwtValid'));
+// Wait for the login token to be validated, then render UI.
+validateToken().then( function() {
+    if (getCookie('jwtValid') != "true") {
+        renderLoginForm();
+    }
+    
+    else {
+        const header = document.createElement("h1");
+        header.textContent = "You are successfully logged in.";
+        document.getElementsByTagName("body")[0].appendChild(header);
+    }
+})

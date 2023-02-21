@@ -127,19 +127,19 @@ def databaseTokenValidateExistence(token):
         # Find the user.
         cur.execute("""SELECT * FROM users WHERE userid=(%s)""", (userID,))
 
-        # Return false if the user in the token isn't found
-        if (cur.fetchone() == None):
+        # Return true if the user in the token is found
+        if (cur.fetchone() != None):
             conn.commit()
             cur.close()
-            return False
+            return True
 
         # commit the changes to the database
         conn.commit()
         # close communication with the database
         cur.close()
 
-        # Return user found.
-        return True
+        # Return user not found.
+        return False
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
