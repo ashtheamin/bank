@@ -9,7 +9,7 @@ def index():
 
 @app.route('/recieveUserLoginForm', methods=['POST'])
 def recieveUserLoginForm():
-    response = make_response(app.send_static_file('index.html'))
+    response = make_response(app.send_static_file('redirectToIndex.html'))
     databaseInit()
     token = databaseUserLogin(request.form['email'], request.form['password']) #type: ignore
     if (token == None):
@@ -32,7 +32,7 @@ def recieveToken():
 
 @app.route('/recieveUserRegistrationForm', methods=['POST'])
 def recieveUserRegistrationForm():
-    response = make_response(app.send_static_file('index.html'))
+    response = make_response(app.send_static_file('redirectToIndex.html'))
     databaseInit()
     databaseUserNew(request
     .form['name'], request.form['email'] ,request.form['password1']) #type: ignore

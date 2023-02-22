@@ -3,6 +3,12 @@ function renderLoginForm() {
     loginForm.setAttribute('method', 'post');
     loginForm.setAttribute('action', '/recieveUserLoginForm');
     loginForm.setAttribute('style', 'display: inline-block;')
+    loginForm.addEventListener("submit", function() {
+        console.log("Submitted")
+        a = document.createElement("a")
+        a.href = "/"
+        a.click()
+    })
 
     const header = document.createElement('h4');
     header.textContent = 'Login to Bank';
@@ -49,7 +55,7 @@ function renderLoginForm() {
 
     if (getCookie('userNotFound') == 'true') {
         p = document.createElement("p");
-        p.textContent = "User not found, or password is incorrect"
+        p.textContent = "User not found, or password is incorrect. Try again."
         document.getElementsByTagName('body')[0].appendChild(p);
     }
     document.getElementsByTagName('body')[0].appendChild(register);
@@ -145,20 +151,21 @@ function getCookie(name) {
 
 async function validateToken() {
     await fetch('/recieveToken').then().then()
-    console.log(getCookie('jwtValid'));
 }
 
 // Wait for the login token to be validated, then render UI.
+// Indentation looks like this to emphasise 
+// that this is a "main function" to avoid confusion.
 validateToken().then( function() {
-    if (getCookie('jwtValid') != 'true') {
-        if (localStorage.getItem('registrationRequested') != 'true') {
-            renderLoginForm();
-        }
-        else {
-            renderRegistrationForm();
-        }
+if (getCookie('jwtValid') != 'true') {
+    if (localStorage.getItem('registrationRequested') != 'true') {
+        renderLoginForm();
     }
     else {
-        renderMainScreen();
+        renderRegistrationForm();
     }
-})
+}
+
+else {
+    renderMainScreen();
+}})
