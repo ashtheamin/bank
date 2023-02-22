@@ -219,13 +219,12 @@ def databaseUserLogin(email, password):
             conn.close()
 
 # Retrieve a user.
-def databaseUserGetByID(userID):
+def databaseUserGetByToken(token):
     """
     Inputs: id:
     Outputs: User tuple (id, name)
     """
-    sql = """SELECT * FROM users WHERE
-            userID=(%s);"""
+    sql = """SELECT userid, username, email FROM users WHERE userID=(%s);"""
     conn = None
     user = None
     try:
@@ -236,20 +235,25 @@ def databaseUserGetByID(userID):
         # create a new cursor
         cur = conn.cursor()
         # execute the SQL statement
-        cur.execute(sql, (userID,))
+        cur.execute(sql, (tokenDecrypt(token)['userID'],))
         user = cur.fetchone()
 
         # commit the changes to the database
         conn.commit()
         # close communication with the database
         cur.close()
+
+        # Return the user information.
+        return {
+            "userID": user[0], #type: ignore
+            "name": user[1], #type: ignore
+            "email": user[2] #type: ignore
+        }
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-
-    return user
 
 # Delete a user.
 def databaseUserDeleteByID(userID):

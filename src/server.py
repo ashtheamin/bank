@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, jsonify
 from database import *
 
 app = Flask(__name__, static_url_path=('/static'))
@@ -39,3 +39,7 @@ def recieveUserRegistrationForm():
     token = databaseUserLogin(request.form['email'], request.form['password1']) #type: ignore
     response.set_cookie('jwt', token)
     return response
+
+@app.route("/fetchUserInformationByToken", methods=['POST', 'GET'])
+def fetchUserInformationByToken():
+    return jsonify(databaseUserGetByToken(request.cookies.get('jwt'))) #type: ignore

@@ -10,7 +10,7 @@ function renderLoginForm() {
     const emailLabel = document.createElement('label');
     emailLabel.textContent = 'Email'
     const email = document.createElement('input');
-    email.setAttribute('type', 'text');
+    email.setAttribute('type', 'email');
     email.setAttribute('name', 'email');
     email.setAttribute('id', 'email');
     email.setAttribute('required', 'true');
@@ -76,7 +76,7 @@ function renderRegistrationForm() {
     const emailLabel = document.createElement('label');
     emailLabel.textContent = 'Email'
     const email = document.createElement('input');
-    email.setAttribute('type', 'text');
+    email.setAttribute('type', 'email');
     email.setAttribute('name', 'email');
     email.setAttribute('id', 'email');
     email.setAttribute('required', 'true');
@@ -90,15 +90,6 @@ function renderRegistrationForm() {
     password1.setAttribute('id', 'password1');
     password1.setAttribute('required', 'true')
     password1.setAttribute('autocomplete', 'current-password1')
-
-    const passwordLabel2 = document.createElement('label');
-    passwordLabel2.textContent = 'Confirm Password';
-    const password2 = document.createElement('input');
-    password2.setAttribute('type', 'password');
-    password2.setAttribute('name', 'password2');
-    password2.setAttribute('id', 'password2');
-    password2.setAttribute('required', 'true')
-    password2.setAttribute('autocomplete', 'current-password2')
 
     const submit = document.createElement('input');
     submit.setAttribute('type', 'submit');
@@ -119,8 +110,6 @@ function renderRegistrationForm() {
     registrationForm.appendChild(email);
     registrationForm.appendChild(passwordLabel1);
     registrationForm.appendChild(password1);
-    registrationForm.appendChild(passwordLabel2);
-    registrationForm.appendChild(password2);
     registrationForm.appendChild(submit);
 
     document.getElementsByTagName('body')[0].appendChild(registrationForm);
@@ -130,6 +119,17 @@ function renderRegistrationForm() {
     registrationForm.addEventListener('submit', function() {
         location.reload();
     })
+}
+
+function renderMainScreen() {
+    var request = new XMLHttpRequest();
+    request.open("GET", "/fetchUserInformationByToken", false);
+    request.send(null);
+    const userInformation = JSON.parse(request.responseText);
+
+    const header = document.createElement("h2")
+    header.textContent = `Welcome, ${userInformation['name']}`
+    document.getElementsByTagName('body')[0].appendChild(header);
 }
 
 // Get cookie function from StackOverFlow by allenhwkim
@@ -157,12 +157,8 @@ validateToken().then( function() {
         else {
             renderRegistrationForm();
         }
-        
     }
-    
     else {
-        const header = document.createElement('h1');
-        header.textContent = 'You are successfully logged in.';
-        document.getElementsByTagName('body')[0].appendChild(header);
+        renderMainScreen();
     }
 })
