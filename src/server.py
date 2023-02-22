@@ -1,18 +1,20 @@
 from flask import Flask, request, make_response
 from database import *
 
-app = Flask(__name__, static_url_path=("/static"))
+app = Flask(__name__, static_url_path=('/static'))
 
 @app.route('/')
 def index():
-    return app.send_static_file("index.html")
+    return app.send_static_file('index.html')
 
 @app.route('/recieveUserLoginForm', methods=['POST'])
 def recieveUserLoginForm():
-    response = make_response(app.send_static_file("index.html"))
+    response = make_response(app.send_static_file('index.html'))
     databaseInit()
-    databaseUserNew("", request.form['email'] ,request.form['password']) #type: ignore
     token = databaseUserLogin(request.form['email'], request.form['password']) #type: ignore
+    if (token == None):
+        response.set_cookie('userNotFound', "true")
+        return response
     response.set_cookie('jwt', token)
     return response
 
@@ -26,4 +28,14 @@ def recieveToken():
         response.set_cookie('jwtValid', 'true')
     else:
         response.set_cookie('jwtValid', 'false')
+    return response
+
+@app.route('/recieveUserRegistrationForm', methods=['POST'])
+def recieveUserRegistrationForm():
+    response = make_response(app.send_static_file('index.html'))
+    databaseInit()
+    databaseUserNew(request
+    .form['name'], request.form['email'] ,request.form['password1']) #type: ignore
+    token = databaseUserLogin(request.form['email'], request.form['password1']) #type: ignore
+    response.set_cookie('jwt', token)
     return response

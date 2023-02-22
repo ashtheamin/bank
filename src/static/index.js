@@ -1,39 +1,39 @@
 function renderLoginForm() {
-    const loginForm = document.createElement("form");
-    loginForm.setAttribute("method", "post");
-    loginForm.setAttribute("action", "/recieveUserLoginForm");
-    loginForm.setAttribute("style", "display: inline-block;")
+    const loginForm = document.createElement('form');
+    loginForm.setAttribute('method', 'post');
+    loginForm.setAttribute('action', '/recieveUserLoginForm');
+    loginForm.setAttribute('style', 'display: inline-block;')
 
-    const header = document.createElement("h4");
-    header.textContent = "Login to Bank";
+    const header = document.createElement('h4');
+    header.textContent = 'Login to Bank';
 
-    const emailLabel = document.createElement("label");
-    emailLabel.textContent = "Email"
-    const email = document.createElement("input");
-    email.setAttribute("type", "text");
-    email.setAttribute("name", "email");
-    email.setAttribute("id", "email");
-    email.setAttribute("required", "true");
-    email.setAttribute("autocomplete", "current-email")
+    const emailLabel = document.createElement('label');
+    emailLabel.textContent = 'Email'
+    const email = document.createElement('input');
+    email.setAttribute('type', 'text');
+    email.setAttribute('name', 'email');
+    email.setAttribute('id', 'email');
+    email.setAttribute('required', 'true');
+    email.setAttribute('autocomplete', 'current-email')
 
-    const passwordLabel = document.createElement("label");
-    passwordLabel.textContent = "Password";
-    const password = document.createElement("input");
-    password.setAttribute("type", "password");
-    password.setAttribute("name", "password");
-    password.setAttribute("id", "password");
-    password.setAttribute("required", "true")
-    password.setAttribute("autocomplete", "current-password")
+    const passwordLabel = document.createElement('label');
+    passwordLabel.textContent = 'Password';
+    const password = document.createElement('input');
+    password.setAttribute('type', 'password');
+    password.setAttribute('name', 'password');
+    password.setAttribute('id', 'password');
+    password.setAttribute('required', 'true')
+    password.setAttribute('autocomplete', 'current-password')
 
-    const submit = document.createElement("input");
-    submit.setAttribute("type", "submit");
-    submit.setAttribute("class", "submit")
+    const submit = document.createElement('input');
+    submit.setAttribute('type', 'submit');
+    submit.setAttribute('class', 'submit')
 
-    const register = document.createElement("button");
-    register.setAttribute("style", "display: inline-block;")
-    register.textContent = "Register a new user"
-    register.addEventListener("click", function() {
-        localStorage.setItem("registrationRequested", "true")
+    const register = document.createElement('button');
+    register.setAttribute('style', 'display: inline-block;')
+    register.textContent = 'Register a new user'
+    register.addEventListener('click', function() {
+        localStorage.setItem('registrationRequested', 'true')
         location.reload()
     })
     
@@ -44,55 +44,70 @@ function renderLoginForm() {
     loginForm.appendChild(password);
     loginForm.appendChild(submit);
 
-    document.getElementsByTagName("body")[0].appendChild(loginForm);
-    document.getElementsByTagName("body")[0].appendChild(document.createElement("div"));
-    document.getElementsByTagName("body")[0].appendChild(register);
+    document.getElementsByTagName('body')[0].appendChild(loginForm);
+    document.getElementsByTagName('body')[0].appendChild(document.createElement('div'));
+
+    if (getCookie('userNotFound') == 'true') {
+        p = document.createElement("p");
+        p.textContent = "User not found, or password is incorrect"
+        document.getElementsByTagName('body')[0].appendChild(p);
+    }
+    document.getElementsByTagName('body')[0].appendChild(register);
 }
 
 function renderRegistrationForm() {
-    const registrationForm = document.createElement("form");
-    registrationForm.setAttribute("method", "post");
-    registrationForm.setAttribute("action", "/recieveUserregistrationForm");
-    registrationForm.setAttribute("style", "display: inline-block;")
+    const registrationForm = document.createElement('form');
+    registrationForm.setAttribute('method', 'post');
+    registrationForm.setAttribute('action', '/recieveUserRegistrationForm');
+    registrationForm.setAttribute('style', 'display: inline-block;')
 
-    const header = document.createElement("h4");
-    header.textContent = "Register to Bank";
+    const header = document.createElement('h4');
+    header.textContent = 'Register to Bank';
 
-    const nameLabel = document.createElement("label");
-    nameLabel.textContent = "Name"
-    const name = document.createElement("input");
-    name.setAttribute("type", "text");
-    name.setAttribute("name", "name");
-    name.setAttribute("id", "name");
-    name.setAttribute("required", "true");
-    name.setAttribute("autocomplete", "current-name")
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Name'
+    const name = document.createElement('input');
+    name.setAttribute('type', 'text');
+    name.setAttribute('name', 'name');
+    name.setAttribute('id', 'name');
+    name.setAttribute('required', 'true');
+    name.setAttribute('autocomplete', 'current-name')
 
-    const emailLabel = document.createElement("label");
-    emailLabel.textContent = "Email"
-    const email = document.createElement("input");
-    email.setAttribute("type", "text");
-    email.setAttribute("name", "email");
-    email.setAttribute("id", "email");
-    email.setAttribute("required", "true");
-    email.setAttribute("autocomplete", "current-email")
+    const emailLabel = document.createElement('label');
+    emailLabel.textContent = 'Email'
+    const email = document.createElement('input');
+    email.setAttribute('type', 'text');
+    email.setAttribute('name', 'email');
+    email.setAttribute('id', 'email');
+    email.setAttribute('required', 'true');
+    email.setAttribute('autocomplete', 'current-email')
 
-    const passwordLabel = document.createElement("label");
-    passwordLabel.textContent = "Password";
-    const password = document.createElement("input");
-    password.setAttribute("type", "password");
-    password.setAttribute("name", "password");
-    password.setAttribute("id", "password");
-    password.setAttribute("required", "true")
-    password.setAttribute("autocomplete", "current-password")
+    const passwordLabel1 = document.createElement('label');
+    passwordLabel1.textContent = 'Password';
+    const password1 = document.createElement('input');
+    password1.setAttribute('type', 'password');
+    password1.setAttribute('name', 'password1');
+    password1.setAttribute('id', 'password1');
+    password1.setAttribute('required', 'true')
+    password1.setAttribute('autocomplete', 'current-password1')
 
-    const submit = document.createElement("input");
-    submit.setAttribute("type", "submit");
-    submit.setAttribute("class", "submit")
+    const passwordLabel2 = document.createElement('label');
+    passwordLabel2.textContent = 'Confirm Password';
+    const password2 = document.createElement('input');
+    password2.setAttribute('type', 'password');
+    password2.setAttribute('name', 'password2');
+    password2.setAttribute('id', 'password2');
+    password2.setAttribute('required', 'true')
+    password2.setAttribute('autocomplete', 'current-password2')
 
-    const returnToLogin = document.createElement("button");
-    returnToLogin.textContent = "Return To Login"
-    returnToLogin.addEventListener("click", function() {
-        localStorage.setItem("registrationRequested", "false");
+    const submit = document.createElement('input');
+    submit.setAttribute('type', 'submit');
+    submit.setAttribute('class', 'submit')
+
+    const returnToLogin = document.createElement('button');
+    returnToLogin.textContent = 'Return To Login'
+    returnToLogin.addEventListener('click', function() {
+        localStorage.setItem('registrationRequested', 'false');
         location.reload()
     })
     
@@ -102,13 +117,19 @@ function renderRegistrationForm() {
     registrationForm.appendChild(name);
     registrationForm.appendChild(emailLabel);
     registrationForm.appendChild(email);
-    registrationForm.appendChild(passwordLabel);
-    registrationForm.appendChild(password);
+    registrationForm.appendChild(passwordLabel1);
+    registrationForm.appendChild(password1);
+    registrationForm.appendChild(passwordLabel2);
+    registrationForm.appendChild(password2);
     registrationForm.appendChild(submit);
 
-    document.getElementsByTagName("body")[0].appendChild(registrationForm);
-    document.getElementsByTagName("body")[0].appendChild(document.createElement("div"));
-    document.getElementsByTagName("body")[0].appendChild(returnToLogin);
+    document.getElementsByTagName('body')[0].appendChild(registrationForm);
+    document.getElementsByTagName('body')[0].appendChild(document.createElement('div'));
+    document.getElementsByTagName('body')[0].appendChild(returnToLogin);
+
+    registrationForm.addEventListener('submit', function() {
+        location.reload();
+    })
 }
 
 // Get cookie function from StackOverFlow by allenhwkim
@@ -129,8 +150,8 @@ async function validateToken() {
 
 // Wait for the login token to be validated, then render UI.
 validateToken().then( function() {
-    if (getCookie('jwtValid') != "true") {
-        if (localStorage.getItem("registrationRequested") != "true") {
+    if (getCookie('jwtValid') != 'true') {
+        if (localStorage.getItem('registrationRequested') != 'true') {
             renderLoginForm();
         }
         else {
@@ -140,8 +161,8 @@ validateToken().then( function() {
     }
     
     else {
-        const header = document.createElement("h1");
-        header.textContent = "You are successfully logged in.";
-        document.getElementsByTagName("body")[0].appendChild(header);
+        const header = document.createElement('h1');
+        header.textContent = 'You are successfully logged in.';
+        document.getElementsByTagName('body')[0].appendChild(header);
     }
 })
