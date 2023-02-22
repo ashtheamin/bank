@@ -472,3 +472,40 @@ def databaseAccountDepositFunds(accountID, amountToDeposit):
     finally:
         if conn is not None:
             conn.close()
+
+# Recieve Account information
+def databaseAccountsGetByToken(token):
+    sql = """SELECT balance, accountID, userID FROM accounts WHERE userID=(%s);"""
+    conn = None
+    try:
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the SQL statement
+        cur.execute(sql, (tokenDecrypt(token)['userID'],))
+        accounts = cur.fetchall()
+
+        # Account list: 
+        accountList = []
+        for account in accounts:
+            accountList.append({
+                "balance": account[0],
+                "accountID": account[1],
+                "userID": account[2],
+            })
+            
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+
+        # Return the account information.
+        return accountList
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()

@@ -108,7 +108,6 @@ function renderRegistrationForm() {
         location.reload()
     })
     
-    
     registrationForm.appendChild(header);
     registrationForm.appendChild(nameLabel);
     registrationForm.appendChild(name);
@@ -132,6 +131,12 @@ function renderMainScreen() {
     request.open("GET", "/fetchUserInformationByToken", false);
     request.send(null);
     const userInformation = JSON.parse(request.responseText);
+
+    request = new XMLHttpRequest();
+    request.open("GET", "/fetchUserAccountsByToken", false);
+    request.send(null);
+    const accountInformation = JSON.parse(request.responseText);
+    console.log(accountInformation)
 
     const header = document.createElement("h2")
     header.textContent = `Welcome, ${userInformation['name']}`

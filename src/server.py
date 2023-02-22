@@ -43,3 +43,7 @@ def recieveUserRegistrationForm():
 @app.route("/fetchUserInformationByToken", methods=['POST', 'GET'])
 def fetchUserInformationByToken():
     return jsonify(databaseUserGetByToken(request.cookies.get('jwt'))) #type: ignore
+
+@app.route("/fetchUserAccountsByToken", methods=['POST', 'GET'])
+def fetchUserAccountsByToken():
+    return jsonify(databaseAccountsGetByToken(request.cookies.get('jwt'))) #type:ignore
