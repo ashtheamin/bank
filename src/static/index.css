@@ -13,3 +13,14 @@ input {
 .submit {
     width:104%;
 }
+
+#accountsList {
+    padding: 0;
+    display: block;
+}
+
+.accountDiv {
+    border-width: 1%;
+    border-color: black;
+    border-style: solid;
+}

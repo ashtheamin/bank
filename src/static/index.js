@@ -136,11 +136,30 @@ function renderMainScreen() {
     request.open("GET", "/fetchUserAccountsByToken", false);
     request.send(null);
     const accountInformation = JSON.parse(request.responseText);
-    console.log(accountInformation)
+    console.log(accountInformation);
 
-    const header = document.createElement("h2")
-    header.textContent = `Welcome, ${userInformation['name']}`
+    const header = document.createElement("h2");
+    header.textContent = `Welcome, ${userInformation['name']}`;
+    const accountsHeader = document.createElement("h3");
+    accountsHeader.textContent = "Accounts";
+    const accountsList = document.createElement("ul");
+    accountsList.setAttribute("id", "accountsList")
+    for (account of accountInformation) {
+        const accountDiv = document.createElement("div");
+        accountDiv.setAttribute("class", "accountDiv");
+        const accountID = document.createElement("p");
+        accountID.textContent = `Account ID: ${account['accountID']}`
+        const accountBalance = document.createElement("p");
+        accountBalance.textContent = `Balance: $${account['balance']}`;
+        accountDiv.appendChild(accountID)
+        accountDiv.appendChild(accountBalance)
+        accountsList.appendChild(accountDiv);
+        console.log(account);
+    }
+    
     document.getElementsByTagName('body')[0].appendChild(header);
+    document.getElementsByTagName('body')[0].appendChild(accountsHeader);
+    document.getElementsByTagName('body')[0].appendChild(accountsList);
 }
 
 // Get cookie function from StackOverFlow by allenhwkim
