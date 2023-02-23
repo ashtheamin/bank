@@ -136,7 +136,6 @@ function renderMainScreen() {
     request.open("GET", "/fetchUserAccountsByToken", false);
     request.send(null);
     const accountInformation = JSON.parse(request.responseText);
-    console.log(accountInformation);
 
     const header = document.createElement("h2");
     header.textContent = `Welcome, ${userInformation['name']}`;
@@ -146,32 +145,60 @@ function renderMainScreen() {
     accountsAddButton.textContent = "Create New Account";
     
     accountsAddButton.addEventListener("click", function() {
+        localStorage.setItem("accountsAddButtonConfirmationRequested", "true");
+        a = document.createElement("a");
+        a.href = "/";
+        a.click();
+    })
+
+    const accountsAddButtonConfirmation = document.createElement("div");
+    const accountsAddButtonConfirmationYes = document.createElement("button");
+    accountsAddButtonConfirmationYes.textContent = "Yes"
+    const accountsAddButtonConfirmationNo = document.createElement("button");
+    accountsAddButtonConfirmationNo.textContent = "No"
+    accountsAddButtonConfirmation.appendChild(accountsAddButtonConfirmationYes);
+    accountsAddButtonConfirmation.appendChild(accountsAddButtonConfirmationNo);
+
+    accountsAddButtonConfirmationYes.addEventListener("click", function() {
         request = new XMLHttpRequest();
         request.open("POST", "/accountNew", false);
         request.send(null);
-        const a = document.createElement("a");
-        a.href=("/");
+        localStorage.setItem("accountsAddButtonConfirmationRequested", "false");
+        a = document.createElement("a");
+        a.href = "/";
+        a.click();
+    })
+
+    accountsAddButtonConfirmationNo.addEventListener("click", function() {
+        localStorage.setItem("accountsAddButtonConfirmationRequested", "false");
+        a = document.createElement("a");
+        a.href = "/";
         a.click();
     })
 
     const accountsList = document.createElement("ul");
-    accountsList.setAttribute("id", "accountsList")
-    for (account of accountInformation) {
-        const accountDiv = document.createElement("div");
-        accountDiv.setAttribute("class", "accountDiv");
-        const accountID = document.createElement("p");
-        accountID.textContent = `Account ID: ${account['accountID']}`
-        const accountBalance = document.createElement("p");
-        accountBalance.textContent = `Balance: $${account['balance']}`;
-        accountDiv.appendChild(accountID)
-        accountDiv.appendChild(accountBalance)
-        accountsList.appendChild(accountDiv);
-        console.log(account);
+    accountsList.setAttribute("id", "accountsList");
+    if (accountInformation != null) {
+        for (account of accountInformation) {
+            const accountDiv = document.createElement("div");
+            accountDiv.setAttribute("class", "accountDiv");
+            const accountID = document.createElement("p");
+            accountID.textContent = `Account ID: ${account['accountID']}`
+            const accountBalance = document.createElement("p");
+            accountBalance.textContent = `Balance: $${account['balance']}`;
+            accountDiv.appendChild(accountID)
+            accountDiv.appendChild(accountBalance)
+            accountsList.appendChild(accountDiv);
+            console.log(account);
+        }
     }
     
     document.getElementsByTagName('body')[0].appendChild(header);
     document.getElementsByTagName('body')[0].appendChild(accountsHeader);
     document.getElementsByTagName('body')[0].appendChild(accountsAddButton);
+    if (localStorage.getItem("accountsAddButtonConfirmationRequested") === "true") {
+        document.getElementsByTagName('body')[0].appendChild(accountsAddButtonConfirmation);
+    }
     document.getElementsByTagName('body')[0].appendChild(accountsList);
 }
 
