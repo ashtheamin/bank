@@ -47,3 +47,10 @@ def fetchUserInformationByToken():
 @app.route("/fetchUserAccountsByToken", methods=['POST', 'GET'])
 def fetchUserAccountsByToken():
     return jsonify(databaseAccountsGetByToken(request.cookies.get('jwt'))) #type:ignore
+
+@app.route("/accountNew", methods=["POST", "GET"])
+def accountNew():
+    response = make_response(app.send_static_file('redirectToIndex.html'))
+    token = request.cookies.get('jwt') #type: ignore
+    databaseAccountNew(token, "0")
+    return response

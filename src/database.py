@@ -306,7 +306,7 @@ def databaseUserUpdateNameByID(userID, name):
             conn.close()
 
 # Open an account for a user.
-def databaseAccountNew(userID, balance):
+def databaseAccountNew(token, balance):
     sql = """INSERT INTO accounts(userID, balance)
              VALUES(%s, %s) RETURNING accountID;
              """
@@ -320,7 +320,7 @@ def databaseAccountNew(userID, balance):
         # create a new cursor
         cur = conn.cursor()
         # execute the SQL statement
-        cur.execute(sql, (userID, balance))
+        cur.execute(sql, (tokenDecrypt(token)['userID'], balance))
 
         # commit the changes to the database
         conn.commit()

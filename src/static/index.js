@@ -142,6 +142,18 @@ function renderMainScreen() {
     header.textContent = `Welcome, ${userInformation['name']}`;
     const accountsHeader = document.createElement("h3");
     accountsHeader.textContent = "Accounts";
+    const accountsAddButton = document.createElement("button");
+    accountsAddButton.textContent = "Create New Account";
+    
+    accountsAddButton.addEventListener("click", function() {
+        request = new XMLHttpRequest();
+        request.open("POST", "/accountNew", false);
+        request.send(null);
+        const a = document.createElement("a");
+        a.href=("/");
+        a.click();
+    })
+
     const accountsList = document.createElement("ul");
     accountsList.setAttribute("id", "accountsList")
     for (account of accountInformation) {
@@ -159,6 +171,7 @@ function renderMainScreen() {
     
     document.getElementsByTagName('body')[0].appendChild(header);
     document.getElementsByTagName('body')[0].appendChild(accountsHeader);
+    document.getElementsByTagName('body')[0].appendChild(accountsAddButton);
     document.getElementsByTagName('body')[0].appendChild(accountsList);
 }
 
