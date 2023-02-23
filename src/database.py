@@ -82,6 +82,19 @@ def databaseInit():
         )
         """),
         ("""
+        CREATE TABLE transactions (
+            transactionID SERIAL PRIMARY KEY,
+            fromAccountID SERIAL,
+            toAccountID SERIAL,
+            FOREIGN KEY (fromAccountID)
+            REFERENCES accounts (accountID)
+            ON UPDATE CASCADE ON DELETE CASCADE,
+            FOREIGN KEY (toAccountID)
+            REFERENCES accounts (accountID)
+            ON UPDATE CASCADE ON DELETE CASCADE
+        )
+        """),
+        ("""
         CREATE TABLE bank (
             balance VARCHAR
         )
