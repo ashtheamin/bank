@@ -98,6 +98,16 @@ def databaseInit():
         CREATE TABLE bank (
             balance VARCHAR
         )
+        """),
+        ("""
+        CREATE TABLE loans (
+            loanID SERIAL PRIMARY KEY,
+            amount varchar,
+            accountID SERIAL,
+            FOREIGN KEY (accountID)
+            REFERENCES accounts (accountID)
+            ON UPDATE CASCADE ON DELETE CASCADE
+        )
         """),]
     conn = None
     try:
@@ -110,7 +120,9 @@ def databaseInit():
         for command in commands:
             cur.execute(command)
         # Store bank balance.
-        cur.execute("""INSERT INTO bank (balance) VALUES(%s)""", ("0",))
+        cur.execute("""SELECT * FROM bank""")
+        if cur.fetchone() == None:
+            cur.execute("""INSERT INTO bank (balance) VALUES(%s)""", ("1000",))
         # close communication with the PostgreSQL database server
         cur.close()
         # commit the changes
@@ -373,8 +385,8 @@ def databaseAccountBalanceUpdateByID(accountID, balance):
             conn.close()
 
 # Delete account.
-def databaseAccountDeleteByID(accountID):
-    sql = """DELETE FROM accounts WHERE accountID=(%s);"""
+def databaseAccountDeleteByID(token, accountID):
+    sql = """DELETE FROM accounts WHERE accountID=(%s) AND userID=(%s);"""
     conn = None
     user = None
     try:
@@ -385,7 +397,7 @@ def databaseAccountDeleteByID(accountID):
         # create a new cursor
         cur = conn.cursor()
         # execute the SQL statement
-        cur.execute(sql, (accountID,))
+        cur.execute(sql, (accountID, tokenDecrypt(token)['userID']))
 
         # commit the changes to the database
         conn.commit()

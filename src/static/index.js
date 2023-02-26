@@ -4,7 +4,6 @@ function renderLoginForm() {
     loginForm.setAttribute('action', '/recieveUserLoginForm');
     loginForm.setAttribute('style', 'display: inline-block;')
     loginForm.addEventListener("submit", function() {
-        console.log("Submitted")
         a = document.createElement("a")
         a.href = "/"
         a.click()
@@ -126,7 +125,100 @@ function renderRegistrationForm() {
     })
 }
 
+function renderAddAccountsButton() {
+    const accountsAddButton = document.createElement("button");
+    accountsAddButton.textContent = "Create New Account";
+    const accountsAddButtonConfirmation = document.createElement("div");
+    const accountsAddButtonConfirmationYes = document.createElement("button");
+    accountsAddButtonConfirmationYes.textContent = "Yes"
+    const accountsAddButtonConfirmationNo = document.createElement("button");
+    accountsAddButtonConfirmationNo.textContent = "No"
+    accountsAddButtonConfirmation.appendChild(accountsAddButtonConfirmationYes);
+    accountsAddButtonConfirmation.appendChild(accountsAddButtonConfirmationNo);
+
+    accountsAddButtonConfirmationYes.addEventListener("click", function() {
+        request = new XMLHttpRequest();
+        request.open("POST", "/accountNew", false);
+        request.send(null);
+        accountsAddButtonConfirmation.remove();
+        renderMainScreen();
+    })
+
+    accountsAddButtonConfirmationNo.addEventListener("click", function() {
+        accountsAddButtonConfirmation.remove();
+    })
+    
+   
+    accountsAddButton.addEventListener("click", function(e) {   
+        e = window.event || e;
+        if (this === e.target) {   
+            accountsAddButton.appendChild(accountsAddButtonConfirmation); 
+        }
+    });
+
+    document.getElementsByTagName('body')[0].appendChild(accountsAddButton);
+}
+
+function renderAccountsListDeleteButton(accountDiv, accountID) {
+    const accountDeleteButton = document.createElement("button");
+    accountDeleteButton.textContent = "Close Account";
+
+    accountDeleteButton.addEventListener("click", function(e) {
+        e = window.event || e;
+        if (this === e.target) {  
+            accountDeleteButton.appendChild(accountDeleteButtonConfirmationDiv); 
+        }
+    });
+
+    const accountDeleteButtonConfirmationDiv = document.createElement("div");
+    const accountDeleteButtonConfirmationDivYes = document.createElement("button");
+    accountDeleteButtonConfirmationDivYes.textContent = "Yes"
+    const accountDeleteButtonConfirmationDivNo = document.createElement("button");
+    accountDeleteButtonConfirmationDivNo.textContent = "No"
+    accountDeleteButtonConfirmationDiv.appendChild
+    (accountDeleteButtonConfirmationDivYes);
+    accountDeleteButtonConfirmationDiv.appendChild(
+    accountDeleteButtonConfirmationDivNo);
+
+    accountDeleteButtonConfirmationDivYes.addEventListener("click", function() {
+        request = new XMLHttpRequest();
+        request.open("POST", "/accountRemove");
+        request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        request.send(JSON.stringify({"accountID":accountID}));
+        accountDeleteButton.removeChild(accountDeleteButtonConfirmationDiv);
+        renderMainScreen();
+    })
+
+    accountDeleteButtonConfirmationDivNo.addEventListener("click", function() {
+        accountDeleteButton.removeChild(accountDeleteButtonConfirmationDiv);
+    })
+
+    accountDiv.appendChild(accountDeleteButton);
+}
+
+function renderAccountsList(accountInformation) {
+    const accountsList = document.createElement("ul");
+    accountsList.setAttribute("id", "accountsList");
+    if (accountInformation != null) {
+        for (account of accountInformation) {
+            const accountDiv = document.createElement("div");
+            accountDiv.setAttribute("class", "accountDiv");
+            const accountID = document.createElement("p");
+            accountID.textContent = `Account ID: ${account['accountID']}`
+            const accountBalance = document.createElement("p");
+            accountBalance.textContent = `Balance: $${account['balance']}`;
+            accountDiv.appendChild(accountID);
+            accountDiv.appendChild(accountBalance);
+            renderAccountsListDeleteButton(accountDiv, account['accountID']);
+            accountsList.appendChild(accountDiv);
+        }
+    }
+    document.getElementsByTagName('body')[0].appendChild(accountsList);
+}
+
 function renderMainScreen() {
+    document.getElementsByTagName('body')[0].innerHTML = ""
+
     var request = new XMLHttpRequest();
     request.open("GET", "/fetchUserInformationByToken", false);
     request.send(null);
@@ -141,65 +233,11 @@ function renderMainScreen() {
     header.textContent = `Welcome, ${userInformation['name']}`;
     const accountsHeader = document.createElement("h3");
     accountsHeader.textContent = "Accounts";
-    const accountsAddButton = document.createElement("button");
-    accountsAddButton.textContent = "Create New Account";
-    
-    accountsAddButton.addEventListener("click", function() {
-        localStorage.setItem("accountsAddButtonConfirmationRequested", "true");
-        a = document.createElement("a");
-        a.href = "/";
-        a.click();
-    })
 
-    const accountsAddButtonConfirmation = document.createElement("div");
-    const accountsAddButtonConfirmationYes = document.createElement("button");
-    accountsAddButtonConfirmationYes.textContent = "Yes"
-    const accountsAddButtonConfirmationNo = document.createElement("button");
-    accountsAddButtonConfirmationNo.textContent = "No"
-    accountsAddButtonConfirmation.appendChild(accountsAddButtonConfirmationYes);
-    accountsAddButtonConfirmation.appendChild(accountsAddButtonConfirmationNo);
-
-    accountsAddButtonConfirmationYes.addEventListener("click", function() {
-        request = new XMLHttpRequest();
-        request.open("POST", "/accountNew", false);
-        request.send(null);
-        localStorage.setItem("accountsAddButtonConfirmationRequested", "false");
-        a = document.createElement("a");
-        a.href = "/";
-        a.click();
-    })
-
-    accountsAddButtonConfirmationNo.addEventListener("click", function() {
-        localStorage.setItem("accountsAddButtonConfirmationRequested", "false");
-        a = document.createElement("a");
-        a.href = "/";
-        a.click();
-    })
-
-    const accountsList = document.createElement("ul");
-    accountsList.setAttribute("id", "accountsList");
-    if (accountInformation != null) {
-        for (account of accountInformation) {
-            const accountDiv = document.createElement("div");
-            accountDiv.setAttribute("class", "accountDiv");
-            const accountID = document.createElement("p");
-            accountID.textContent = `Account ID: ${account['accountID']}`
-            const accountBalance = document.createElement("p");
-            accountBalance.textContent = `Balance: $${account['balance']}`;
-            accountDiv.appendChild(accountID)
-            accountDiv.appendChild(accountBalance)
-            accountsList.appendChild(accountDiv);
-            console.log(account);
-        }
-    }
-    
     document.getElementsByTagName('body')[0].appendChild(header);
     document.getElementsByTagName('body')[0].appendChild(accountsHeader);
-    document.getElementsByTagName('body')[0].appendChild(accountsAddButton);
-    if (localStorage.getItem("accountsAddButtonConfirmationRequested") === "true") {
-        document.getElementsByTagName('body')[0].appendChild(accountsAddButtonConfirmation);
-    }
-    document.getElementsByTagName('body')[0].appendChild(accountsList);
+    renderAddAccountsButton();
+    renderAccountsList(accountInformation);
 }
 
 // Get cookie function from StackOverFlow by allenhwkim

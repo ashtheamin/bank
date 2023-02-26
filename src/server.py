@@ -54,3 +54,10 @@ def accountNew():
     token = request.cookies.get('jwt') #type: ignore
     databaseAccountNew(token, "0")
     return response
+
+@app.route("/accountRemove", methods=['GET', 'POST'])
+def accountRemove():
+    response = make_response(app.send_static_file('redirectToIndex.html'))
+    token = request.cookies.get('jwt') #type: ignore
+    databaseAccountDeleteByID(token, request.get_json()['accountID'])
+    return response
