@@ -159,6 +159,39 @@ function renderAddAccountsButton() {
     document.getElementsByTagName('body')[0].appendChild(accountsAddButton);
 }
 
+function renderAccountsListAccessLoan(accountDiv, accountID) {
+    const loanForm = document.createElement("form");
+    loanForm.setAttribute("style", "display: inline-block; padding: 0;");
+    loanForm.setAttribute("method", "post");
+    loanForm.setAttribute("action", "/requestLoan");
+
+    const loanAmountLabel = document.createElement("label");
+    loanAmountLabel.textContent = "Loan Amount";
+
+    const loanAmount = document.createElement("input");
+    loanAmount.setAttribute("type", "text");
+    loanAmount.setAttribute("name", "loanAmount");
+    loanAmount.setAttribute("id", "loanAmount");
+
+    const loanAccount = document.createElement("input");
+    loanAccount.setAttribute("style", "display: none");
+    loanAccount.setAttribute("type", "text");
+    loanAccount.setAttribute("name", "accountID");
+    loanAccount.setAttribute("id", "accountID");
+    loanAccount.value = accountID
+
+    const loanSubmit = document.createElement("input");
+    loanSubmit.setAttribute("style", "display: none");
+    loanSubmit.setAttribute("type", "submit");
+
+    loanForm.appendChild(loanAmountLabel);
+    loanForm.appendChild(loanAmount);
+    loanForm.appendChild(loanAccount);
+    loanForm.appendChild(loanSubmit);
+    accountDiv.appendChild(loanForm);
+    accountDiv.appendChild(document.createElement("div"))
+}
+
 function renderAccountsListDeleteButton(accountDiv, accountID) {
     const accountDeleteButton = document.createElement("button");
     accountDeleteButton.textContent = "Close Account";
@@ -209,6 +242,7 @@ function renderAccountsList(accountInformation) {
             accountBalance.textContent = `Balance: $${account['balance']}`;
             accountDiv.appendChild(accountID);
             accountDiv.appendChild(accountBalance);
+            renderAccountsListAccessLoan(accountDiv, account['accountID'])
             renderAccountsListDeleteButton(accountDiv, account['accountID']);
             accountsList.appendChild(accountDiv);
         }

@@ -61,3 +61,12 @@ def accountRemove():
     token = request.cookies.get('jwt') #type: ignore
     databaseAccountDeleteByID(token, request.get_json()['accountID'])
     return response
+
+@app.route("/requestLoan", methods=['POST'])
+def requestLoan():
+    response = make_response(app.send_static_file('redirectToIndex.html'))
+    token = request.cookies.get('jwt') #type: ignore
+    accountID = request.form['accountID']
+    loanAmount = request.form['loanAmount']
+    print(databaseLoanRequest(token, accountID, loanAmount))
+    return response

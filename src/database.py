@@ -437,7 +437,7 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
         # Get the from account's balance
         fromAccountBalance = 0
         cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (fromAccountID,))
-        fromAccountBalance = int(cur.fetchone()[0]) # type:ignore
+        fromAccountBalance = float(cur.fetchone()[0]) # type:ignore
 
         if fromAccountBalance < amountOfFundsToTransfer:
             conn.commit()
@@ -450,7 +450,7 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
         # Get the to account balance.
         toAccountBalance = 0
         cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (toAccountID,))
-        toAccountBalance = int(cur.fetchone()[0]) # type:ignore
+        toAccountBalance = float(cur.fetchone()[0]) # type:ignore
 
         # Add the funds to the transferred account's balance.
         cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((toAccountBalance+amountOfFundsToTransfer), toAccountID,))
@@ -529,6 +529,64 @@ def databaseAccountsGetByToken(token):
 
         # Return the account information.
         return accountList
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+# Get loan from bank to add to user.
+def databaseLoanRequest(token, accountID, loanAmount):
+    conn = None
+    try:
+        print(loanAmount)
+        # read database configuration
+        params = databaseConfig()
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(**params)
+        # create a new cursor
+        cur = conn.cursor()
+
+        # Check if the bank has enough money to lend.
+        cur.execute("""SELECT balance from bank""")
+        bankBalance = cur.fetchone()[0]
+        if float(bankBalance) <= float(loanAmount):
+            conn.commit()
+            cur.close()
+            return "false"
+        
+        # Get the account's balance.
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s) AND userID=(%s)""", 
+        (accountID, tokenDecrypt(token)['userID']))
+        accountBalance = cur.fetchone()[0]
+
+        # Add the loan amount to the account.
+        accountBalance = float(loanAmount) + float(accountBalance)
+
+        # Subtract the bank balance.
+        bankBalance = float(bankBalance) - float(loanAmount)
+
+        # Update the bank.
+        cur.execute("""UPDATE bank SET balance=(%s)""", (bankBalance,))
+
+        # Update the account.
+        cur.execute("""UPDATE accounts 
+            SET balance=(%s) WHERE accountID=(%s) 
+            AND USERID=(%s)""",
+            (accountBalance, accountID, tokenDecrypt(token)['userID']));
+        
+        # Add the loan to the loan logs.
+        cur.execute("""INSERT INTO loans (accountID, amount) VALUES (%s, %s)""",
+        (accountID, loanAmount))
+      
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+
+        # Return the account information.
+        return "true"
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
