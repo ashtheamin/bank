@@ -188,6 +188,19 @@ function renderAccountsListAccessLoan(accountDiv, accountID) {
     loanForm.appendChild(loanAmount);
     loanForm.appendChild(loanAccount);
     loanForm.appendChild(loanSubmit);
+
+    if (getCookie('loanApproved') == "true") {
+        const loanSuccess = document.createElement("label");
+        loanSuccess.textContent = "Loan Granted";
+        loanForm.appendChild(loanSuccess);
+    }
+
+    if (getCookie('loanApproved') == "false") {
+        const loanDenied = document.createElement("label");
+        loanDenied.textContent = "Loan Denied";
+        loanForm.appendChild(loanDenied);
+    }
+    console.log(getCookie('loanApproved'));
     accountDiv.appendChild(loanForm);
     accountDiv.appendChild(document.createElement("div"))
 }

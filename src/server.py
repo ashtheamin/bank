@@ -68,5 +68,6 @@ def requestLoan():
     token = request.cookies.get('jwt') #type: ignore
     accountID = request.form['accountID']
     loanAmount = request.form['loanAmount']
-    print(databaseLoanRequest(token, accountID, loanAmount))
+    response.set_cookie("loanApproved", 
+    databaseLoanRequest(token, accountID, loanAmount))
     return response
