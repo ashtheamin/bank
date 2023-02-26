@@ -86,6 +86,7 @@ def databaseInit():
             transactionID SERIAL PRIMARY KEY,
             fromAccountID SERIAL,
             toAccountID SERIAL,
+            amount VARCHAR,
             FOREIGN KEY (fromAccountID)
             REFERENCES accounts (accountID)
             ON UPDATE CASCADE ON DELETE CASCADE,
@@ -460,6 +461,9 @@ def databaseAccountTransferFunds(token, fromAccountID, toAccountID, amountOfFund
         toAccountBalance = float(toAccountBalance) + float(amountOfFundsToTransfer)
         cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", (toAccountBalance, toAccountID,))
 
+        # Store the transaction:
+        cur.execute("""INSERT INTO transactions (fromAccountID, toAccountID, amount) VALUES (%s, %s, %s)""",
+        (fromAccountID, toAccountID, amountOfFundsToTransfer,))
         # commit the changes to the database
         conn.commit()
         # close communication with the database
