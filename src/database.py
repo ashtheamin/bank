@@ -410,7 +410,7 @@ def databaseAccountDeleteByID(token, accountID):
             conn.close()
 
 # Transfer funds between accounts.
-def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTransfer):
+def databaseAccountTransferFunds(token, fromAccountID, toAccountID, amountOfFundsToTransfer):
     conn = None
     try:
         # read database configuration
@@ -421,31 +421,35 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
         cur = conn.cursor()
 
         # Check if the accounts exist.
-        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (fromAccountID,))
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s) AND userID=(%s);""", 
+        (fromAccountID, tokenDecrypt(token)['userID']))
         if cur.fetchone() == None:
             conn.commit()
             cur.close()
-            return
+            return "false"
         
         cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (toAccountID,))
         if cur.fetchone() == None:
             conn.commit()
             cur.close()
-            return
+            return "false"
 
 
         # Get the from account's balance
         fromAccountBalance = 0
-        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s);""", (fromAccountID,))
+        cur.execute("""SELECT balance FROM accounts WHERE accountID=(%s) AND userID=(%s);""", 
+        (fromAccountID, tokenDecrypt(token)['userID']))
         fromAccountBalance = float(cur.fetchone()[0]) # type:ignore
 
-        if fromAccountBalance < amountOfFundsToTransfer:
+        if fromAccountBalance < float(amountOfFundsToTransfer):
             conn.commit()
             cur.close()
-            return
+            return "false"
         
-        # Deduct the account's balance.
-        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((fromAccountBalance-amountOfFundsToTransfer), fromAccountID,))
+        # Deduct the senders account's balance.
+        fromAccountBalance = float(fromAccountBalance) - float(amountOfFundsToTransfer)
+        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", 
+        ((fromAccountBalance), fromAccountID,))
 
         # Get the to account balance.
         toAccountBalance = 0
@@ -453,12 +457,14 @@ def databaseAccountTransferFunds(fromAccountID, toAccountID, amountOfFundsToTran
         toAccountBalance = float(cur.fetchone()[0]) # type:ignore
 
         # Add the funds to the transferred account's balance.
-        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", ((toAccountBalance+amountOfFundsToTransfer), toAccountID,))
+        toAccountBalance = float(toAccountBalance) + float(amountOfFundsToTransfer)
+        cur.execute("""UPDATE accounts SET balance=(%s) where accountID=(%s)""", (toAccountBalance, toAccountID,))
 
         # commit the changes to the database
         conn.commit()
         # close communication with the database
         cur.close()
+        return "true"
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:

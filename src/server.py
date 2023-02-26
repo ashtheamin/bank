@@ -71,3 +71,15 @@ def requestLoan():
     response.set_cookie("loanApproved", 
     databaseLoanRequest(token, accountID, loanAmount))
     return response
+
+@app.route("/transferFunds", methods=["POST"])
+def transferFunds():
+    response = make_response(app.send_static_file('redirectToIndex.html'))
+    token = request.cookies.get('jwt') #type: ignore
+    fromAccountID = request.form['fromAccountID']
+    toAccountID = request.form['toAccountID']
+    transferAmount = request.form['transferAmount']
+    print(fromAccountID, toAccountID, transferAmount)
+    #response.set_cookie("fundsTransferSuccessful", 
+    databaseAccountTransferFunds(token, fromAccountID, toAccountID, transferAmount)
+    return response

@@ -201,8 +201,58 @@ function renderAccountsListAccessLoan(accountDiv, accountID) {
         loanForm.appendChild(loanDenied);
     }
     console.log(getCookie('loanApproved'));
+    const loanHeader = document.createElement("h4");
+    loanHeader.textContent = "Get loan from bank"
+    accountDiv.appendChild(loanHeader);
     accountDiv.appendChild(loanForm);
     accountDiv.appendChild(document.createElement("div"))
+}
+
+function renderAccountsListTransferFunds(accountDiv, accountID) {
+    const fundsTransferForm = document.createElement("form");
+    fundsTransferForm.setAttribute("style", "display: inline-block; padding: 0%;");
+    fundsTransferForm.setAttribute("method", "post");
+    fundsTransferForm.setAttribute("action", "/transferFunds"); 
+
+    const fundsTransferLabel = document.createElement("h4");
+    fundsTransferLabel.textContent = "Transfer funds to account."
+
+    const fundsTransferAmountLabel = document.createElement("label");
+    fundsTransferAmountLabel.textContent = "Amount of $ to transfer.";
+    const fundsTransferAmountInput = document.createElement("input");
+    fundsTransferAmountInput.setAttribute("type", "text");
+    fundsTransferAmountInput.setAttribute("id", "transferAmount");
+    fundsTransferAmountInput.setAttribute("name", "transferAmount");
+
+    const fundsTransferAccountLabel = document.createElement("label");
+    fundsTransferAccountLabel.textContent = "To account ID."
+    const fundsTransferInputToAccount = document.createElement("input");
+
+    fundsTransferInputToAccount.setAttribute("type", "text");
+    fundsTransferInputToAccount.setAttribute("id", "toAccountID");
+    fundsTransferInputToAccount.setAttribute("name", "toAccountID");
+
+    const fundsTransferFromAccount = document.createElement("input");
+    fundsTransferFromAccount.setAttribute("style", "display: none");
+    fundsTransferFromAccount.setAttribute("id", "fromAccountID");
+    fundsTransferFromAccount.setAttribute("name", "fromAccountID");
+    fundsTransferFromAccount.value = accountID;
+
+    const fundsTransferFormSubmit = document.createElement("input");
+    fundsTransferFormSubmit.setAttribute("type", "submit");
+    fundsTransferFormSubmit.setAttribute("style", "display: none;");
+
+    fundsTransferForm.appendChild(fundsTransferLabel);
+    fundsTransferForm.appendChild(document.createElement('div'))
+    fundsTransferForm.appendChild(fundsTransferAmountLabel);
+    fundsTransferForm.appendChild(document.createElement('div'));
+    fundsTransferForm.appendChild(fundsTransferAmountInput);
+    fundsTransferForm.appendChild(fundsTransferAccountLabel);
+    fundsTransferForm.appendChild(fundsTransferInputToAccount);
+    fundsTransferForm.appendChild(fundsTransferFromAccount);
+    fundsTransferForm.appendChild(fundsTransferFormSubmit);
+    accountDiv.appendChild(fundsTransferForm);
+    accountDiv.appendChild(document.createElement('div'));
 }
 
 function renderAccountsListDeleteButton(accountDiv, accountID) {
@@ -251,11 +301,12 @@ function renderAccountsList(accountInformation) {
             accountDiv.setAttribute("class", "accountDiv");
             const accountID = document.createElement("p");
             accountID.textContent = `Account ID: ${account['accountID']}`
-            const accountBalance = document.createElement("p");
+            const accountBalance = document.createElement("h3");
             accountBalance.textContent = `Balance: $${account['balance']}`;
-            accountDiv.appendChild(accountID);
             accountDiv.appendChild(accountBalance);
-            renderAccountsListAccessLoan(accountDiv, account['accountID'])
+            accountDiv.appendChild(accountID);
+            renderAccountsListAccessLoan(accountDiv, account['accountID']);
+            renderAccountsListTransferFunds(accountDiv, account['accountID']);
             renderAccountsListDeleteButton(accountDiv, account['accountID']);
             accountsList.appendChild(accountDiv);
         }
