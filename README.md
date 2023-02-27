@@ -1,19 +1,12 @@
 # bank
 Web based banking app
-
-# How to open psql:
-sudo -u postgres psql
-
-
-
-# Drop all tables
-
+![Bank app depicting list of accounts](doc/screenshot1.png)
 
 # Project initialisation instructions.
 # Open PostgreSQL
 sudo -u postgres psql
 
-# Create database
+## Create database
 sudo -u postgres createdb bankdb
 
 # Create database user
